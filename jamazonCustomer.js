@@ -3,6 +3,8 @@
 //setup requires
 var inquirer = require('inquirer');
 var mysql = require('mysql');
+var prodName;
+var chosenQuantity;
 
 //setup mysql connection
 var connection = mysql.createConnection({
@@ -60,8 +62,24 @@ listAllProducts();
 // 8. However, if your store _does_ have enough of the product, you should fulfill the customer's order.
 //    * This means updating the SQL database to reflect the remaining quantity.
 //    * Once the update goes through, show the customer the total cost of their purchase.
-function processInventory(){
+function processInventory(answers){
+    //console.log(answers.askQuantity)
 
+    connection.query('SELECT stock_quantity FROM jamazon_inventory WHERE item_id='+answers.askQuantity,function(err,res){
+        if (err) throw err;
+        var remainingQnt = JSON.stringify(res).split(':')[1].split('}')[0];
+        var askingQnt = answers.askQuantity;
+        var finalQnt = remainingQnt-askingQnt;
+
+        if (finalQnt>-1){
+            console.log(finalQnt)
+        } else {
+            console.log('Insufficient Funds!')
+            return;
+        }   
+
+    })
+    //console.log(answers.askQuantity)
 
 }
 
@@ -69,13 +87,27 @@ function processInventory(){
 
 
 //asks user for the quantity desired
-function requestQuantity(){
+function requestQuantity(answers){
+
+    
     //analogous to chosenItemID in requestItemID
-    var chosenQuantity;
+    connection.query('SELECT * FROM jamazon_inventory WHERE item_id='+answers.askItemID,function(err,res){
+        if (err) throw err;
+        var splitArr = JSON.stringify(res).split(',')
+        splitArr = splitArr[1].split(':')
+        prodName = splitArr[1]
+        console.log(prodName)
+    })
+
+    console.log('You have selected ')
+    inquirer.prompt(questions[1]).then(answers => {
+        //console.log(answers)
+        processInventory(answers);
+    })
 
 
 
-    validateQuantity();
+    
 }
 
 
@@ -84,9 +116,9 @@ function requestQuantity(){
 function requestItemID(){
     //going to write an inquire prompt that gets the prompt
     var chosenItemID;
-    inquirer.prompt(questions[0]).then(function(err,res){
-        if (err) throw err;
-        console.log(res)
+    inquirer.prompt(questions[0]).then(answers => {
+        console.log(answers);
+        requestQuantity(answers);
     })
 
 }
