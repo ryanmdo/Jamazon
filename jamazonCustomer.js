@@ -1,3 +1,5 @@
+
+
 //setup requires
 var inquirer = require('inquirer');
 var mysql = require('mysql');
@@ -17,6 +19,18 @@ connection.connect( function(err){
 ;})
 
 
+//write the questions in an array
+var questions = [{
+    name:'askItemID',
+    type:'input',
+    message: 'Choose a product and Input its item id value'
+},{
+    name:'askQuantity',
+    type:'input',
+    message:'How many would you like to purchase?'
+}]
+
+
 
 
 
@@ -27,14 +41,14 @@ function listAllProducts(){
     //build a simple tab separated tabled
     console.log('Welcome to the Jamazon Web Store.\n')
 
-    for(var i=1;i<11;i++){
+    for(var i=1;i<12;i++){
         connection.query('SELECT * FROM jamazon_inventory WHERE item_id='+i,function(err, res){
-            if (err) throw err;
+            if (err) throw err; 
             console.log(JSON.stringify(res))
-
-        
         })
     }
+
+    requestItemID();
 
 }
 
@@ -70,17 +84,12 @@ function requestQuantity(){
 function requestItemID(){
     //going to write an inquire prompt that gets the prompt
     var chosenItemID;
-
-
-
-
-    connection.query('SELECT * FROM jamazon_inventory WHERE item_id='+chosenItemID,
-    function(err,res){
+    inquirer.prompt(questions[0]).then(function(err,res){
         if (err) throw err;
-
+        console.log(res)
     })
 
-
-
-    requestQuantity();
 }
+
+
+
