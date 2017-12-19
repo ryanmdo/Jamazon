@@ -76,11 +76,18 @@ function processInventory(answers,itemId){
 
         //process it
         if (finalQnt>-1){
-            console.log(finalQnt)
+            //console.log(finalQnt)
             connection.query('UPDATE jamazon_inventory SET stock_quantity='+finalQnt+' WHERE item_id='+itemId+';',function(err,res){
                 if (err) throw err;
-                console.log(res)
+                //console.log(res)
             })
+
+            connection.query('SELECT price FROM jamazon_inventory WHERE item_id='+itemId+';',function(err,res){
+                if (err) throw err;
+                var finalPrice = res[0].price*askingQnt;
+                console.log('The final price of your purchase would be: '+finalPrice)
+            })
+            //print invoice
         } else { //don't process, and just print out insufficient
             console.log('Insufficient Remaining Quantity! We cannot process the requested transaction')
             return;
@@ -109,7 +116,7 @@ function requestQuantity(answers){
 
     console.log('You have selected ')
     inquirer.prompt(questions[1]).then(answers => {
-        console.log(stringItemID)
+        //console.log(stringItemID)
         processInventory(answers,stringItemID);
     })
 
