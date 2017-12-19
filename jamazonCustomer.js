@@ -62,19 +62,27 @@ listAllProducts();
 // 8. However, if your store _does_ have enough of the product, you should fulfill the customer's order.
 //    * This means updating the SQL database to reflect the remaining quantity.
 //    * Once the update goes through, show the customer the total cost of their purchase.
-function processInventory(answers){
-    //console.log(answers.askQuantity)
+function processInventory(answers,itemId){
+    //console.log('answers: '+answers)
+    //console.log("itemId:"+itemId)
 
-    connection.query('SELECT stock_quantity FROM jamazon_inventory WHERE item_id='+answers.askQuantity,function(err,res){
+    connection.query('SELECT stock_quantity FROM jamazon_inventory WHERE item_id='+itemId,function(err,res){
         if (err) throw err;
+        //console.log(JSON.stringify(res))
         var remainingQnt = JSON.stringify(res).split(':')[1].split('}')[0];
         var askingQnt = answers.askQuantity;
         var finalQnt = remainingQnt-askingQnt;
 
+
+        //process it
         if (finalQnt>-1){
             console.log(finalQnt)
-        } else {
-            console.log('Insufficient Funds!')
+            connection.query('UPDATE jamazon_inventory SET stock_quantity='+finalQnt+' WHERE item_id='+itemId+';',function(err,res){
+                if (err) throw err;
+                console.log(res)
+            })
+        } else { //don't process, and just print out insufficient
+            console.log('Insufficient Remaining Quantity! We cannot process the requested transaction')
             return;
         }   
 
@@ -89,7 +97,7 @@ function processInventory(answers){
 //asks user for the quantity desired
 function requestQuantity(answers){
 
-    
+    var stringItemID = answers.askItemID;
     //analogous to chosenItemID in requestItemID
     connection.query('SELECT * FROM jamazon_inventory WHERE item_id='+answers.askItemID,function(err,res){
         if (err) throw err;
@@ -101,8 +109,8 @@ function requestQuantity(answers){
 
     console.log('You have selected ')
     inquirer.prompt(questions[1]).then(answers => {
-        //console.log(answers)
-        processInventory(answers);
+        console.log(stringItemID)
+        processInventory(answers,stringItemID);
     })
 
 
@@ -117,7 +125,7 @@ function requestItemID(){
     //going to write an inquire prompt that gets the prompt
     var chosenItemID;
     inquirer.prompt(questions[0]).then(answers => {
-        console.log(answers);
+        //console.log(answers);
         requestQuantity(answers);
     })
 
