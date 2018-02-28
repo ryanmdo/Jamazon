@@ -17,5 +17,5 @@ user inputs desired quantity of product
 invoice printout
 
 
-![updated quantity](./github-img/Update-Qnt.png)
+![updated quantity](./github-img/Updated-Qnt.png)
 the quantity of the product has been updated
